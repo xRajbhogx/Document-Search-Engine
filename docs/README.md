@@ -15,7 +15,7 @@ These notes explain **what this project is**, **how it's built**, and **the theo
 | 5 | [Finite Automaton](05-finite-automaton.md) | Transition table δ, reading each char once | ✅ |
 | 6 | [KMP](06-kmp.md) | Prefix function π, never moving the text pointer back | ✅ |
 | 7 | [Comparing the algorithms](07-comparing-the-algorithms.md) | Side-by-side complexity and real comparison counts | ✅ |
-| 8 | Backend (store, service, HTTP API) | How search/compare/explain work end to end | ⏳ step 3–4 |
+| 8 | [Backend](08-backend.md) | Document store, search/compare/explain, HTTP API | 🟡 store + service done, HTTP in step 4 |
 | 9 | Frontend (React UI) | Components, data flow, how results are shown | ⏳ step 5–8 |
 
 ## One running example
