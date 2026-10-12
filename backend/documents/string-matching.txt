@@ -1,0 +1,25 @@
+String Matching
+
+String matching is the problem of finding every place where a short string, called the pattern, occurs inside a longer string, called the text. Text editors use it when you press Ctrl+F. Search engines use it to find documents that contain your words. Biologists use it to find a gene sequence inside a genome, and antivirus programs use it to find known byte signatures inside files.
+
+We write the text as T with length n and the pattern as P with length m. We say that P occurs with shift s in T if T[s..s+m-1] equals P. A shift where this is true is called a valid shift. The goal of a string matching algorithm is to find all valid shifts.
+
+The naive algorithm
+
+The simplest algorithm tries every shift from 0 to n-m. At each shift it compares the pattern with the text one character at a time, from left to right, and stops at the first mismatch. If all m characters match, the shift is valid. The naive algorithm needs no preprocessing, but in the worst case it does about (n-m+1)*m comparisons. That worst case happens when the text and pattern are very repetitive, for example when searching for aaaab in a text made of many a characters.
+
+The Rabin-Karp algorithm
+
+Rabin and Karp suggested comparing numbers instead of strings. Each window of m characters is treated as a number written in base d, and the number is kept small by taking it modulo a prime q. If the hash of the window is different from the hash of the pattern, the window cannot be a match, so no characters need to be checked. If the hashes are equal, the characters are compared to rule out a spurious hit. The trick that makes this fast is the rolling hash: the hash of the next window can be computed from the hash of the current one in constant time, by removing the leading character and adding the new trailing character.
+
+The finite automaton algorithm
+
+A finite automaton is a machine with a set of states and a transition function. For string matching we build an automaton with m+1 states, numbered 0 to m. Being in state q means that the last q characters read from the text are equal to the first q characters of the pattern. The transition function tells the machine which state to go to after reading the next character. When the machine reaches state m, the whole pattern has just been read, so a match has been found. After the table is built, the automaton reads each text character exactly once, so matching takes linear time. Building the table, however, is expensive when the pattern is long or the alphabet is large.
+
+The Knuth-Morris-Pratt algorithm
+
+Knuth, Morris and Pratt found a way to get linear matching time without building the full transition table. Their algorithm computes a prefix function for the pattern. For each position q in the pattern, the prefix function gives the length of the longest proper prefix of the pattern that is also a suffix of the first q characters. When a mismatch happens, this value tells the algorithm how far it can shift the pattern without missing a match. Because the text pointer never moves backwards, the matching phase runs in O(n) time, and computing the prefix function takes only O(m) time.
+
+Choosing an algorithm
+
+For short texts the naive algorithm is often good enough, and it is the easiest to write correctly. Rabin-Karp is useful when many patterns of the same length must be searched at once, because each window hash can be compared against a whole set of pattern hashes. The finite automaton is a good fit when the same pattern is searched in a very long stream and the alphabet is small. KMP is a strong general-purpose choice because its running time is linear in the worst case and its extra memory is only proportional to the length of the pattern.
