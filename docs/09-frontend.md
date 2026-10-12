@@ -85,3 +85,122 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 cd backend && ./run.sh                 # terminal 1: API on :8080
 cd frontend && npm install && npm run dev   # terminal 2: UI on http://localhost:5173
 ```
+
+## 9.5 The page layout
+
+![Search results for "fox" with KMP](images/search-results.png)
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ Header: Document Search Engine                                   │
+├──────────────┬───────────────────────────────────────────────────┤
+│ DocumentPanel│ SearchBar: [pattern] [algorithm ▾] (case) [Search]│
+│  drop-zone   ├───────────────────────────────────────────────────┤
+│  doc list    │ Tabs: Results                                     │
+│   🗑 delete  │  ResultsList: summary + one card per document      │
+└──────────────┴───────────────────────────────────────────────────┘
+```
+
+On narrow screens the grid becomes one column: documents first, then search, then results.
+
+## 9.6 Where the state lives
+
+There is no router and no state library. All the state is plain `useState` in `App.tsx`, and it's passed down to the components as **props**. Components report changes back up through **callback props** (`onSearch`, `onChanged`...).
+
+| State in `App.tsx` | Meaning | Used by |
+|---|---|---|
+| `documents`, `loadingDocs` | The document list from `GET /api/documents` | DocumentPanel |
+| `query`, `algo`, `caseSensitive` | What's typed and selected in the search bar right now | SearchBar |
+| `lastSearch` | The pattern/algorithm/case setting of the results on screen | ResultsList, re-searching |
+| `result`, `searching` | The last `SearchResponse`, and whether a search is running | ResultsList |
+
+```mermaid
+flowchart TD
+    APP["App.tsx<br/>(all state)"]
+    APP -- "documents, loading" --> DP["DocumentPanel"]
+    DP -- "onChanged()" --> APP
+    APP -- "query, algo, caseSensitive" --> SB["SearchBar"]
+    SB -- "onQueryChange / onAlgoChange /<br/>onCaseSensitiveChange / onSearch" --> APP
+    APP -- "result, query, loading" --> RL["ResultsList"]
+    APP <-- "fetch via lib/api.ts" --> BE[("Java backend")]
+```
+
+**Why keep `lastSearch` separate from `query`?** If you search `fox` and then start typing `foxes`, the results on screen are still for `fox`. The summary line must say `fox`, so it reads from `lastSearch`, not from the input box.
+
+### What happens on Search
+
+```mermaid
+sequenceDiagram
+    participant U as You
+    participant SB as SearchBar
+    participant A as App
+    participant API as lib/api.ts
+    participant RL as ResultsList
+    U->>SB: type "fox", press Enter
+    SB->>A: onSearch()
+    A->>A: searching = true
+    A-->>RL: loading → skeletons
+    A->>API: search("fox", "KMP", false)
+    API-->>A: SearchResponse
+    A->>A: result = response, lastSearch = {fox, KMP, false}, searching = false
+    A-->>RL: draws summary + cards
+```
+
+### After an upload or delete
+
+`DocumentPanel` calls the API itself, shows a toast, then calls `onChanged()`. `App` then reloads the document list **and re-runs the last search**, so the results never show a document that was just deleted (or miss one that was just uploaded).
+
+## 9.7 The components
+
+### DocumentPanel
+
+- **Drop-zone:** a dashed box that handles `onDragOver` / `onDrop`. Clicking it opens a hidden `<input type="file" accept=".txt" multiple>`. Each file is read in the browser with `file.text()` and sent as the body of `POST /api/documents?name=...`.
+- Files that don't end in `.txt` are rejected with a toast before anything is sent.
+- After picking, the input's value is reset to `""`. Otherwise the browser wouldn't fire `onChange` if you picked the same file again.
+- The list shows each name and character count, plus a delete button (🗑).
+- While loading: three grey **skeleton** bars. With no documents: a short hint.
+- The list scrolls once it's taller than 24rem (`ScrollArea`).
+
+### SearchBar
+
+- A `<form>`, so pressing **Enter** searches, the same as clicking the button.
+- The input has `maxLength={100}`, the same limit as the backend (`MAX_PATTERN_LENGTH`).
+- The algorithm `Select` lists the four algorithms from `ALGORITHMS` in `types.ts`. KMP is the default.
+- The **Search** button is disabled while the pattern is empty or a search is running, and shows a spinner while running.
+
+### ResultsList
+
+| Situation | What you see |
+|---|---|
+| no search yet | an empty state explaining what to do |
+| searching | skeleton bars |
+| no matches | "No matches: "zzzz" doesn't occur in any document." |
+| matches | summary line + one card per document |
+
+The **summary line** shows the total matches and the badges *algorithm · time · comparisons*. For example: **7 matches for `fox` in 1 document** · KMP · 1.179 ms · 24,036 comparisons.
+
+Each **document card** shows:
+- the match count (badge),
+- the positions, i.e. the valid shifts s (up to 30, then "+N more"),
+- one line per snippet: the position, then `before` **`match`** `after`, with the match in a yellow `<mark>`. Snippets use a monospace font, so DNA sequences line up.
+
+Because snippets come from the original text, a case-insensitive search for `fox` shows both `fox` and `Fox` highlighted. Switching on **Case-sensitive** and searching `Fox` with Rabin-Karp finds only the 3 capitalised ones.
+
+## 9.8 How it was checked
+
+A Playwright script drove the real app in Microsoft Edge (kept outside the repo, since the project has no test framework):
+
+| Action | Result |
+|---|---|
+| open the page | 4 sample documents listed, 23,930 characters |
+| search `fox`, KMP, case-insensitive | 7 matches in `the-tortoise-and-the-hare.txt`, 24,036 comparisons |
+| Rabin-Karp + case-sensitive, `Fox` | "3 matches for Fox in 1 document" |
+| search `zzzz` | "No matches" empty state |
+| upload a 40-character `.txt` while `FOX` is searched | toast, list shows 5 docs, results re-run and include the new file |
+| delete it | toast, back to 4 docs |
+| backend stopped | toast: "Can't reach the server. Is the backend running on port 8080?" |
+| 420px-wide window | single-column layout |
+
+No errors appeared in the browser console.
+
+One React detail: in development, `<StrictMode>` runs every effect **twice** to help find bugs. So the "load documents" effect fired twice and showed the offline toast twice. Passing `{ id: e.message }` to `toast.error` fixed it, because sonner shows only one toast per id.

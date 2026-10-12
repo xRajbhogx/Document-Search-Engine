@@ -100,7 +100,7 @@ backend/
     Main.java        ✅ HTTP server
   documents/         ✅ sample .txt files
   run.sh / run.ps1   ✅ compile + start
-frontend/            🟡 React app (scaffold + typed API client)
+frontend/            🟡 React app (documents, search, results)
 docs/                ✅ these notes
 ```
 
@@ -113,7 +113,7 @@ docs/                ✅ these notes
 | 3 | `DocumentStore` + `SearchService` | ✅ |
 | 4 | HTTP API, sample docs, run scripts | ✅ |
 | 5 | Frontend scaffold | ✅ |
-| 6 | Documents panel, search bar, results | ⏳ |
+| 6 | Documents panel, search bar, results | ✅ |
 | 7 | Comparison view (table + chart) | ⏳ |
 | 8 | How-it-works view + polish | ⏳ |
 

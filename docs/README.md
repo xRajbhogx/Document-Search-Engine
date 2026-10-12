@@ -16,7 +16,7 @@ These notes explain **what this project is**, **how it's built**, and **the theo
 | 6 | [KMP](06-kmp.md) | Prefix function π, never moving the text pointer back | ✅ |
 | 7 | [Comparing the algorithms](07-comparing-the-algorithms.md) | Side-by-side complexity and real comparison counts | ✅ |
 | 8 | [Backend](08-backend.md) | Document store, search/compare/explain, HTTP API, real numbers | ✅ |
-| 9 | [Frontend](09-frontend.md) | Toolchain, `/api` proxy, typed API, components | 🟡 scaffold done, components in steps 6–8 |
+| 9 | [Frontend](09-frontend.md) | Toolchain, `/api` proxy, typed API, components | 🟡 documents, search and results done; comparison + how-it-works in steps 7–8 |
 
 ## One running example
 
