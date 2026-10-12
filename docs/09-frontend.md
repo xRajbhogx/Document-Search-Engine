@@ -204,3 +204,55 @@ A Playwright script drove the real app in Microsoft Edge (kept outside the repo,
 No errors appeared in the browser console.
 
 One React detail: in development, `<StrictMode>` runs every effect **twice** to help find bugs. So the "load documents" effect fired twice and showed the offline toast twice. Passing `{ id: e.message }` to `toast.error` fixed it, because sonner shows only one toast per id.
+
+## 9.9 The Comparison tab
+
+![Comparison of all four algorithms on aaaaaaaaaab](images/comparison.png)
+
+Pressing **Search** now sends **two requests at the same time**, the chosen algorithm's search and the comparison of all four:
+
+```ts
+const [found, compared] = await Promise.all([
+  api.search(params.q, params.algo, params.caseSensitive),
+  api.compare(params.q, params.caseSensitive),
+])
+```
+
+`Promise.all` waits for both. So switching between the *Results* and *Comparison* tabs is instant, and both tabs always describe the **same** search.
+
+### What `ComparisonView` shows
+
+1. **A check line:** *"All four found the same 200 matches."* If the algorithms ever disagreed, it would show a warning instead. That would mean a bug in one of them.
+2. **A table:** comparisons, time and matches per algorithm. A **fewest** badge marks the lowest comparison count, and a **fastest** badge the lowest time.
+3. **Two bar charts:** one for comparisons, one for time.
+4. **Three notes** explaining the numbers that surprise people most (FA = n, how Rabin-Karp is counted, Naive on repetitive text).
+
+### Chart design choices
+
+| Choice | Why |
+|---|---|
+| **Two charts, not one with two y-axes** | Comparisons (tens of thousands) and milliseconds (around 1) have completely different scales. A chart with two y-axes makes you compare bar heights that mean different things. |
+| **Horizontal bars** | Algorithm names like "Finite Automaton" fit on the left instead of being squeezed under the bars. |
+| **One colour, best bar dark** | Each chart shows a single measure, so colour isn't needed to tell series apart. Instead it **emphasises** the winner: the lowest bar is dark, the rest grey. |
+| **Thin bars (max 24px), rounded only at the end** | The bar grows from a flat baseline. The rounded end is where the value is. |
+| **Tooltip on hover** | Shows the exact value. The table lists every number anyway. |
+| **Compact axis ticks** | `80000` is shown as `80K`. |
+
+### Real numbers (from the app, pattern `aaaaaaaaaab`)
+
+| Algorithm | Comparisons | Matches |
+|---|---|---|
+| Naive | 73,954 | 200 |
+| Rabin-Karp | **2,455** (fewest) | 200 |
+| Finite Automaton | 23,930 | 200 |
+| KMP | 30,830 | 200 |
+
+The comparison counts are identical every time you run it. The times changed on every run during testing; for example, KMP took 0.453 ms on one run and 0.704 ms on another. That's why the time chart says *"Depends on the machine: varies between runs."*
+
+### Small screens
+
+At 420px wide the table was too wide. Two things are hidden below the `sm` breakpoint (640px):
+- the **Matches** column: the check line above the table already says how many matches all four found,
+- the **fewest / fastest** badges: the dark bar in each chart still shows the winner.
+
+Tailwind does this with classes like `hidden sm:table-cell` (hidden by default, a normal table cell from `sm` up).
