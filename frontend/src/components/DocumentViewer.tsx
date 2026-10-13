@@ -48,8 +48,9 @@ export function DocumentViewer({ doc, onClose }: Props) {
             ))}
           </div>
         ) : (
-          <ScrollArea className="rounded-lg border bg-muted/30 [&>[data-slot=scroll-area-viewport]]:max-h-[60vh]">
-            <pre className="p-4 font-mono text-xs leading-relaxed break-words whitespace-pre-wrap">{text}</pre>
+          // Radix wraps the content in a display:table div that grows to fit the longest line; block makes it wrap
+          <ScrollArea className="min-w-0 rounded-lg border bg-muted/30 [&>[data-slot=scroll-area-viewport]]:max-h-[60vh] [&>[data-slot=scroll-area-viewport]>div]:block!">
+            <pre className="p-4 font-mono text-xs leading-relaxed wrap-anywhere whitespace-pre-wrap">{text}</pre>
           </ScrollArea>
         )}
       </DialogContent>
