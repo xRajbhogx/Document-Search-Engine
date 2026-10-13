@@ -6,6 +6,7 @@ import { DocumentPanel } from "@/components/DocumentPanel"
 import { HowItWorks } from "@/components/HowItWorks"
 import { ResultsList } from "@/components/ResultsList"
 import { SearchBar } from "@/components/SearchBar"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { Toaster } from "@/components/ui/sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import * as api from "@/lib/api"
@@ -78,11 +79,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-muted/40">
       <header className="border-b bg-background">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <h1 className="text-lg font-semibold">Document Search Engine</h1>
-          <p className="text-sm text-muted-foreground">
-            Naive · Rabin-Karp · Finite Automaton · KMP
-          </p>
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <div>
+            <h1 className="text-lg font-semibold">Document Search Engine</h1>
+            <p className="text-sm text-muted-foreground">
+              Naive · Rabin-Karp · Finite Automaton · KMP
+            </p>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
 

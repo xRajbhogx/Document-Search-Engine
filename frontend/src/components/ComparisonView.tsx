@@ -47,7 +47,7 @@ export function ComparisonView({ rows, query, loading }: Props) {
           <CardDescription className="flex items-center gap-1.5">
             {allAgree ? (
               <>
-                <CircleCheck className="size-4 text-green-600" />
+                <CircleCheck className="size-4 text-green-600 dark:text-green-500" />
                 All four found the same {rows[0].totalMatches.toLocaleString()} matches.
               </>
             ) : (

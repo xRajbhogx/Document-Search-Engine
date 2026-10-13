@@ -147,7 +147,7 @@ function TransitionTable({ pre }: { pre: Preprocessing }) {
                   key={c}
                   className={cn("text-center", next === q + 1 ? "font-bold" : next === 0 && "text-muted-foreground")}
                 >
-                  {next === q + 1 ? <span className="rounded bg-yellow-200 px-1.5 py-0.5">{next}</span> : next}
+                  {next === q + 1 ? <span className="rounded bg-yellow-200 px-1.5 py-0.5 dark:bg-yellow-500/40">{next}</span> : next}
                 </TableCell>
               ))}
             </TableRow>

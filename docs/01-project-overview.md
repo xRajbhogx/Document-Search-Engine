@@ -116,6 +116,7 @@ docs/                ✅ these notes
 | 6 | Documents panel, search bar, results | ✅ |
 | 7 | Comparison view (table + chart) | ✅ |
 | 8 | How-it-works view + polish | ✅ |
+| 9 | Dark mode | ✅ |
 
 ## The common interface
 

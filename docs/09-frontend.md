@@ -330,3 +330,63 @@ Non-zero π values are bold. Those are the places where KMP can keep part of a m
 - In the Rabin-Karp view, `h` uses real superscripts (`<sup>`), and the rolling-hash formula is on its own line instead of wrapping in the middle.
 - **Favicon:** the Vite logo was replaced with a small magnifier icon (`public/favicon.svg`).
 - **Re-checked in Edge:** all of the 9.8 checks plus the Comparison and How-it-works tabs, on desktop and at 420px. No console errors.
+
+## 9.11 Dark mode
+
+A sun/moon button in the header switches between light and dark. The first time you open the app it follows your OS setting. After you click the button, your choice is saved and used on the next visit.
+
+![The How it works tab in dark mode](images/dark-mode.png)
+
+### How CSS variables make it cheap
+
+shadcn/ui never writes a fixed colour like `bg-white`. Components use **semantic names** (`bg-background`, `text-muted-foreground`, `border-border`), and each name points to a CSS variable. `index.css` defines every variable twice:
+
+```css
+:root { --background: oklch(1 0 0);     --foreground: oklch(0.145 0 0); }   /* light */
+.dark { --background: oklch(0.145 0 0); --foreground: oklch(0.985 0 0); }   /* dark  */
+```
+
+So dark mode is just **one class on `<html>`**. When `dark` is there, every variable switches, and every component changes colour with no extra code.
+
+| Name used in a component | Light | Dark |
+|---|---|---|
+| `background` | white | near-black |
+| `foreground` | near-black | near-white |
+| `muted` (tiles, code chips) | light grey | dark grey |
+| `border` | light grey | white at 10% |
+
+The only places that needed changes were the three fixed colours: the yellow highlight in the δ table, the green tick in the Comparison tab, and the match `<mark>` (which already had one). Each got a `dark:` variant, for example `bg-yellow-200 dark:bg-yellow-500/40`. The bar charts already used `var(--foreground)` for the best bar, so in dark mode it turns white.
+
+### Who sets the class
+
+```mermaid
+flowchart TD
+    A[Page loads] --> B["index.html script<br/>(runs before the first paint)"]
+    B --> C{"localStorage.theme?"}
+    C -- "dark / light" --> D[use it]
+    C -- "none (system)" --> E["OS setting<br/>prefers-color-scheme"]
+    D --> F["add class to &lt;html&gt;"]
+    E --> F
+    F --> G[React starts: next-themes ThemeProvider]
+    G --> H[ThemeToggle click]
+    H --> I["setTheme('dark' / 'light')<br/>saves to localStorage, updates the class"]
+```
+
+- **`next-themes`** (already installed, because shadcn's toast component reads the theme from it) wraps the app in `main.tsx`. It keeps the class in sync, saves the choice, and gives `ThemeToggle` the `useTheme()` hook.
+- **The `index.html` script** prevents a white flash. Without it, React has to load before the class is set, so a dark-mode user would see one frame of the light page. next-themes has its own script for this, but that script only runs when the page is rendered on a server. Here it never runs, and React 19 prints a warning about it, so `main.tsx` marks it as data (`scriptProps={{ type: "application/json" }}`) and `index.html` does the job instead.
+- **`ThemeToggle`** draws both icons and lets CSS pick one (`dark:hidden` / `hidden dark:block`), so the icon is correct from the first frame.
+
+### How it was checked
+
+In Edge, with the same throwaway Playwright setup as 9.8:
+
+| Check | Result |
+|---|---|
+| Fresh visit, OS in light mode | `<html class="light">` |
+| Fresh visit, OS in dark mode | `<html class="dark">` |
+| Click the toggle | class becomes `dark`, `localStorage.theme = "dark"` |
+| Reload the page | stays `dark` |
+| Click again | back to `light` |
+| Results, Comparison and How it works tabs in dark mode | readable, highlights visible |
+| Console errors | none |
+
