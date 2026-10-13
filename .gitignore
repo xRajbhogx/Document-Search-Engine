@@ -4,3 +4,8 @@ frontend/dist/
 .vscode/
 .idea/
 *.class
+
+# Local assistant notes and planning files (not part of the project)
+CLAUDE.md
+PLAN.md
+.claude/
