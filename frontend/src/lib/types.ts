@@ -19,6 +19,10 @@ export interface DocumentInfo {
   size: number // number of characters
 }
 
+export interface DocumentContent extends DocumentInfo {
+  text: string
+}
+
 export interface Snippet {
   before: string
   match: string

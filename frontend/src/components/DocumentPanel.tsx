@@ -1,7 +1,8 @@
-import { useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { FileText, Trash2, Upload } from "lucide-react"
 import { toast } from "sonner"
 
+import { DocumentViewer } from "@/components/DocumentViewer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -16,10 +17,12 @@ interface Props {
   onChanged: () => void
 }
 
-/** Lists the documents, and lets you upload .txt files (drop or pick) and delete them. */
+/** Lists the documents, and lets you open, upload (drop or pick) and delete .txt files. */
 export function DocumentPanel({ documents, loading, onChanged }: Props) {
   const fileInput = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
+  const [viewing, setViewing] = useState<DocumentInfo | null>(null)
+  const closeViewer = useCallback(() => setViewing(null), [])
 
   async function upload(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -111,15 +114,22 @@ export function DocumentPanel({ documents, loading, onChanged }: Props) {
               {documents.map((doc) => (
                 <li
                   key={doc.id}
-                  className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/50"
+                  className="flex items-center gap-1 rounded-lg hover:bg-muted/50"
                 >
-                  <FileText className="size-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.size.toLocaleString()} characters
-                    </p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setViewing(doc)}
+                    title={`Open ${doc.name}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <FileText className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{doc.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {doc.size.toLocaleString()} characters
+                      </p>
+                    </div>
+                  </button>
                   <Button
                     variant="ghost"
                     size="icon-sm"
@@ -135,6 +145,7 @@ export function DocumentPanel({ documents, loading, onChanged }: Props) {
           </ScrollArea>
         )}
       </CardContent>
+      <DocumentViewer doc={viewing} onClose={closeViewer} />
     </Card>
   )
 }

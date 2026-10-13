@@ -6,7 +6,7 @@ A small document search engine built around four classic string matching algorit
 
 ## Features
 
-- **Documents:** sample `.txt` files are included. You can upload your own (drag and drop) or delete them.
+- **Documents:** sample `.txt` files are included. Click a document to read its full text, upload your own (drag and drop), or delete them.
 - **Search:** find a pattern across all documents with the algorithm you pick. Each result shows the match count, the positions, and snippets with the match highlighted. Case-sensitive search can be switched on or off.
 - **Comparison:** runs all four algorithms on the same search and shows time and character comparisons in a table and bar charts.
 - **How it works:** for the current pattern, shows each algorithm's complexity, a short explanation, and its preprocessing (KMP π table, Finite Automaton δ table, Rabin-Karp hash values).
@@ -97,6 +97,7 @@ npm run build    # output goes to frontend/dist/
 | Method | Path | Params | Returns |
 |---|---|---|---|
 | GET | `/api/documents` | - | `[{id,name,size}]` |
+| GET | `/api/documents/{id}` | - | `{id,name,size,text}` |
 | POST | `/api/documents?name=x.txt` | raw text body | `{id,name,size}` |
 | DELETE | `/api/documents/{id}` | - | 204 |
 | GET | `/api/search` | `q, algo, caseSensitive` | `{algorithm,timeMs,comparisons,results:[...]}` |

@@ -4,6 +4,7 @@
 import type {
   Algorithm,
   CompareRow,
+  DocumentContent,
   DocumentInfo,
   Explanation,
   SearchResponse,
@@ -30,6 +31,10 @@ function query(params: Record<string, string | boolean>): string {
 
 export function listDocuments() {
   return request<DocumentInfo[]>("/api/documents")
+}
+
+export function getDocument(id: string) {
+  return request<DocumentContent>(`/api/documents/${encodeURIComponent(id)}`)
 }
 
 export function uploadDocument(name: string, text: string) {

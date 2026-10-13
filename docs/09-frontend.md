@@ -157,7 +157,7 @@ sequenceDiagram
 - **Drop-zone:** a dashed box that handles `onDragOver` / `onDrop`. Clicking it opens a hidden `<input type="file" accept=".txt" multiple>`. Each file is read in the browser with `file.text()` and sent as the body of `POST /api/documents?name=...`.
 - Files that don't end in `.txt` are rejected with a toast before anything is sent.
 - After picking, the input's value is reset to `""`. Otherwise the browser wouldn't fire `onChange` if you picked the same file again.
-- The list shows each name and character count, plus a delete button (🗑).
+- The list shows each name and character count, plus a delete button (🗑). Clicking a name opens the document in a viewer (9.12).
 - While loading: three grey **skeleton** bars. With no documents: a short hint.
 - The list scrolls once it's taller than 24rem (`ScrollArea`).
 
@@ -390,3 +390,40 @@ In Edge, with the same throwaway Playwright setup as 9.8:
 | Results, Comparison and How it works tabs in dark mode | readable, highlights visible |
 | Console errors | none |
 
+
+## 9.12 Viewing a document
+
+Clicking a document in the list opens its full text in a shadcn `Dialog`.
+
+![Document viewer](images/document-viewer.png)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant P as DocumentPanel
+    participant V as DocumentViewer
+    participant J as Java backend
+    U->>P: click "string-matching.txt"
+    P->>V: doc = {id, name, size}
+    V->>J: GET /api/documents/string-matching
+    J-->>V: {id, name, size, text}
+    V-->>U: dialog with the text
+```
+
+- **Why a separate route?** `GET /api/documents` only sends `{id,name,size}`, so the list stays small no matter how big the files are. The text is fetched only when you open a document.
+- **State:** `DocumentPanel` keeps `viewing` (the open document, or `null`). The dialog is open whenever `viewing` is not `null`, and closing it (✕, Esc, or clicking outside) sets it back to `null`.
+- **Loading:** `DocumentViewer` remembers which document its text belongs to. If you open a different one, the old text is not shown: skeleton bars appear until the new text arrives.
+- **Layout:** the text is in a `<pre>` with `whitespace-pre-wrap`, so line breaks are kept but long lines wrap. The box scrolls once it is taller than 60% of the screen. The header shows the size and line count, e.g. `3,727 characters · 26 lines` for `string-matching.txt`.
+- **Keyboard:** each row is a real `<button>`, so Tab + Enter opens it. The delete button is a separate button next to it.
+
+### How it was checked
+
+In Edge, with a throwaway Playwright script:
+
+| Check | Result |
+|---|---|
+| Open `string-matching.txt` | title and `3,727 characters · 26 lines`, 3,727 characters of text shown |
+| Close with Esc, open `repetitive.txt` | shows the new text (`aaaa...`), not the old one |
+| Close with ✕, focus `dna-sample.txt`, press Enter | opens |
+| 420px wide screen, dark mode | fits and is readable |
+| Console errors | none |

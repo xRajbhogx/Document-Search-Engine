@@ -39,7 +39,7 @@ The name comes from the user, so it's cleaned before it touches the disk:
 | `t2` | `t2.txt` (`.txt` added) |
 | `...` | rejected: "Invalid document name" |
 
-`delete` only accepts ids made of letters, digits, `.`, `_` and `-`, so a request like `DELETE /api/documents/../x` can't escape the folder.
+`find` and `delete` only accept ids made of letters, digits, `.`, `_` and `-`, so a request like `GET /api/documents/../x` can't escape the folder.
 
 ## 8.2 Algorithm: choosing a matcher by name
 
@@ -142,6 +142,8 @@ The routes share one `run(...)` helper that catches exceptions. The service thro
 | Request | Status | Body |
 |---|---|---|
 | `GET /api/documents` | 200 | `[{id,name,size}]` (`size` = number of characters) |
+| `GET /api/documents/repetitive` | 200 | `{"id":"repetitive","name":"repetitive.txt","size":5668,"text":"aaaa..."}` |
+| `GET /api/documents/nope` | 404 | `{"error":"No document with id nope"}` |
 | `POST /api/documents?name=My%20Test%20File.txt` | 201 | `{"id":"My-Test-File","name":"My-Test-File.txt","size":34}` |
 | `DELETE /api/documents/My-Test-File` | 204 | (none) |
 | same DELETE again | 404 | `{"error":"No document with id My-Test-File"}` |

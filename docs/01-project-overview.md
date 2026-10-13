@@ -32,7 +32,7 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph Browser["Frontend: React + TypeScript (port 5173)"]
-        UI["App.tsx<br/>DocumentPanel · SearchBar · ResultsList<br/>ComparisonView · HowItWorks"]
+        UI["App.tsx<br/>DocumentPanel · DocumentViewer · SearchBar · ResultsList<br/>ComparisonView · HowItWorks"]
         API["lib/api.ts<br/>fetch('/api/...')"]
         UI --> API
     end
@@ -117,6 +117,7 @@ docs/                ✅ these notes
 | 7 | Comparison view (table + chart) | ✅ |
 | 8 | How-it-works view + polish | ✅ |
 | 9 | Dark mode | ✅ |
+| 10 | Document viewer | ✅ |
 
 ## The common interface
 
