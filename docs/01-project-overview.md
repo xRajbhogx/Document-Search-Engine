@@ -118,6 +118,7 @@ docs/                ✅ these notes
 | 8 | How-it-works view + polish | ✅ |
 | 9 | Dark mode | ✅ |
 | 10 | Document viewer | ✅ |
+| 11 | Viva guide (docs) | ✅ |
 
 ## The common interface
 
