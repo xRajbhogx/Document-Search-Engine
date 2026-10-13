@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class DocumentStore {
 
-    /** One loaded document. */
     public record Document(String id, String name, String text) {
     }
 
@@ -25,7 +24,6 @@ public class DocumentStore {
         Files.createDirectories(folder);
     }
 
-    /** All documents, sorted by name. */
     public List<Document> all() throws IOException {
         List<Document> docs = new ArrayList<>();
         try (DirectoryStream<Path> files = Files.newDirectoryStream(folder, "*.txt")) {
@@ -45,12 +43,26 @@ public class DocumentStore {
         return read(file);
     }
 
+    /** One document by id, or null if it does not exist. */
+    public Document find(String id) throws IOException {
+        if (!isValidId(id)) {
+            return null;
+        }
+        Path file = folder.resolve(id + ".txt");
+        return Files.exists(file) ? read(file) : null;
+    }
+
     /** Deletes a document. Returns false if it does not exist. */
     public boolean delete(String id) throws IOException {
-        if (!id.matches("[A-Za-z0-9._-]+")) {
-            return false;   // also blocks paths like "../x"
+        if (!isValidId(id)) {
+            return false;
         }
         return Files.deleteIfExists(folder.resolve(id + ".txt"));
+    }
+
+    /** Ids may only use these characters, which also blocks paths like "../x". */
+    private static boolean isValidId(String id) {
+        return id.matches("[A-Za-z0-9._-]+");
     }
 
     private Document read(Path file) throws IOException {

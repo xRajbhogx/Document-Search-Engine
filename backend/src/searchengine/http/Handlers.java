@@ -28,6 +28,13 @@ public class Handlers {
         }
     }
 
+    /** One document with its full text, for GET /api/documents/{id}. */
+    public record DocumentContent(String id, String name, int size, String text) {
+        static DocumentContent of(Document doc) {
+            return new DocumentContent(doc.id(), doc.name(), doc.text().length(), doc.text());
+        }
+    }
+
     private final DocumentStore store;
     private final SearchService service;
 
@@ -36,7 +43,7 @@ public class Handlers {
         this.service = service;
     }
 
-    /** GET /api/documents, POST /api/documents?name=x.txt, DELETE /api/documents/{id} */
+    /** GET /api/documents, GET /api/documents/{id}, POST /api/documents?name=x.txt, DELETE /api/documents/{id} */
     public void documents(HttpExchange ex) throws IOException {
         run(ex, () -> {
             String method = ex.getRequestMethod();
@@ -46,6 +53,13 @@ public class Handlers {
             if (method.equals("GET") && id.isEmpty()) {
                 List<DocumentInfo> list = store.all().stream().map(DocumentInfo::of).toList();
                 sendJson(ex, 200, list);
+            } else if (method.equals("GET")) {
+                Document doc = store.find(id);
+                if (doc != null) {
+                    sendJson(ex, 200, DocumentContent.of(doc));
+                } else {
+                    sendJson(ex, 404, Map.of("error", "No document with id " + id));
+                }
             } else if (method.equals("POST") && id.isEmpty()) {
                 String name = query(ex).get("name");
                 if (name == null || name.isBlank()) {
@@ -93,8 +107,6 @@ public class Handlers {
         });
     }
 
-    // ---- helpers ----
-
     private interface Action {
         void run() throws IOException;
     }
@@ -130,7 +142,6 @@ public class Handlers {
         return params;
     }
 
-    /** caseSensitive defaults to false. */
     private static boolean caseSensitive(Map<String, String> params) {
         return Boolean.parseBoolean(params.get("caseSensitive"));
     }
