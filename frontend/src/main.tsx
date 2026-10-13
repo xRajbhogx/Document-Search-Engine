@@ -6,9 +6,8 @@ import App from './App'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {/* attribute="class": dark mode = a `dark` class on <html>. Starts from the OS setting until the user picks one.
-        scriptProps: next-themes renders an inline script that only runs with server rendering; marking it as
-        data stops React's warning. index.html does that job here instead. */}
+    {/* next-themes' inline script only runs with server rendering, so it is marked as data
+        to stop a React warning. index.html sets the theme class instead. */}
     <ThemeProvider
       attribute="class"
       defaultTheme="system"

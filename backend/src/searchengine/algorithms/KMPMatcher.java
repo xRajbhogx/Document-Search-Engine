@@ -60,7 +60,7 @@ public class KMPMatcher implements StringMatcher {
             }
             comparisons++;       // the final P[q] vs T[i] comparison
             if (P.charAt(q) == T.charAt(i)) {
-                q++;   // next character matches
+                q++;
             }
             if (q == m) {
                 positions.add(i - m + 1);   // pattern occurs with shift i - m + 1

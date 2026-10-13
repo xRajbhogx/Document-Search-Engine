@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 interface Props {
   documents: DocumentInfo[]
   loading: boolean
-  onChanged: () => void // called after an upload or delete
+  onChanged: () => void
 }
 
 /** Lists the documents, and lets you upload .txt files (drop or pick) and delete them. */
@@ -57,7 +57,6 @@ export function DocumentPanel({ documents, loading, onChanged }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {/* Drop-zone: drop files here or click to pick them */}
         <div
           role="button"
           tabIndex={0}

@@ -31,13 +31,13 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph Browser["Frontend — React + TypeScript (port 5173)"]
+    subgraph Browser["Frontend: React + TypeScript (port 5173)"]
         UI["App.tsx<br/>DocumentPanel · SearchBar · ResultsList<br/>ComparisonView · HowItWorks"]
         API["lib/api.ts<br/>fetch('/api/...')"]
         UI --> API
     end
 
-    subgraph Server["Backend — plain Java 21 (port 8080)"]
+    subgraph Server["Backend: plain Java 21 (port 8080)"]
         Main["Main.java<br/>HttpServer + routes"]
         H["http/Handlers.java<br/>+ Json.java"]
         SS["service/SearchService.java<br/>search · compare · explain"]

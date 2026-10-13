@@ -1,4 +1,4 @@
-# Learning Guide — Document Search Engine
+# Learning Guide: Document Search Engine
 
 These notes explain **what this project is**, **how it's built**, and **the theory behind it**, so you can learn every concept from one place. They are updated as each feature is built.
 

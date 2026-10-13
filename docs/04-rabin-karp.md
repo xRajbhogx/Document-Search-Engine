@@ -16,7 +16,7 @@ The trick that makes this fast is the **rolling hash**: the hash of the next win
 flowchart LR
     A["window T[s..s+m−1]"] --> B["hash t"]
     B --> C{"t == p ?"}
-    C -- no --> D["skip — no char comparisons"]
+    C -- no --> D["skip, no char comparisons"]
     C -- yes --> E["verify char by char"]
     E --> F{"all equal?"}
     F -- yes --> G["✅ valid match"]

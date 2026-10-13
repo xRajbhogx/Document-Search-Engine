@@ -20,16 +20,13 @@ interface SearchParams {
 }
 
 export default function App() {
-  // Documents (left sidebar)
   const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [loadingDocs, setLoadingDocs] = useState(true)
 
-  // Search bar inputs
   const [query, setQuery] = useState("")
   const [algo, setAlgo] = useState<Algorithm>("KMP")
   const [caseSensitive, setCaseSensitive] = useState(false)
 
-  // Results
   const [lastSearch, setLastSearch] = useState<SearchParams | null>(null)
   const [result, setResult] = useState<SearchResponse | null>(null)
   const [comparison, setComparison] = useState<CompareRow[] | null>(null)

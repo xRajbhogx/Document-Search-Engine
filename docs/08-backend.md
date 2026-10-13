@@ -101,7 +101,7 @@ Returns the algorithm's description, its complexity, and the **preprocessing for
 
 | Algorithm | `preprocessing` contains | Helper used |
 |---|---|---|
-| Naive | just `pattern`, `m` (no preprocessing) | – |
+| Naive | just `pattern`, `m` (no preprocessing) | - |
 | Rabin-Karp | `d`, `q`, `h`, `p` | `computeH`, `patternHash` |
 | Finite Automaton | `alphabet` (Σ + `"other"`), `delta` (m+1 rows) | `alphabet`, `computeTransitionFunction` |
 | KMP | `pi` | `computePrefixFunction` |

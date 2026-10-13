@@ -1,4 +1,4 @@
-# Document Search Engine — String Matching
+# Document Search Engine: String Matching
 
 A small document search engine built around four classic string matching algorithms. Load `.txt` documents, search them for a pattern, and see how the algorithms compare: running time, number of character comparisons, and the preprocessing table each one builds.
 
@@ -96,9 +96,9 @@ npm run build    # output goes to frontend/dist/
 
 | Method | Path | Params | Returns |
 |---|---|---|---|
-| GET | `/api/documents` | – | `[{id,name,size}]` |
+| GET | `/api/documents` | - | `[{id,name,size}]` |
 | POST | `/api/documents?name=x.txt` | raw text body | `{id,name,size}` |
-| DELETE | `/api/documents/{id}` | – | 204 |
+| DELETE | `/api/documents/{id}` | - | 204 |
 | GET | `/api/search` | `q, algo, caseSensitive` | `{algorithm,timeMs,comparisons,results:[...]}` |
 | GET | `/api/compare` | `q, caseSensitive` | `[{algorithm,timeMs,comparisons,totalMatches}]` |
 | GET | `/api/explain` | `q, algo` | `{algorithm,complexity,description,preprocessing}` |
