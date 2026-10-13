@@ -96,8 +96,8 @@ cd frontend && npm install && npm run dev   # terminal 2: UI on http://localhost
 ├──────────────┬───────────────────────────────────────────────────┤
 │ DocumentPanel│ SearchBar: [pattern] [algorithm ▾] (case) [Search]│
 │  drop-zone   ├───────────────────────────────────────────────────┤
-│  doc list    │ Tabs: Results                                     │
-│   🗑 delete  │  ResultsList: summary + one card per document      │
+│  doc list    │ Tabs: Results | Comparison | How it works         │
+│   🗑 delete  │  ResultsList / ComparisonView / HowItWorks         │
 └──────────────┴───────────────────────────────────────────────────┘
 ```
 
@@ -256,3 +256,77 @@ At 420px wide the table was too wide. Two things are hidden below the `sm` break
 - the **fewest / fastest** badges: the dark bar in each chart still shows the winner.
 
 Tailwind does this with classes like `hidden sm:table-cell` (hidden by default, a normal table cell from `sm` up).
+
+## 9.10 The How it works tab
+
+![The finite automaton's δ table for ababaca](images/how-it-works.png)
+
+This tab shows, for the pattern you just searched, the description and complexity of each algorithm and **the table it builds before reading the text**. It's the "preprocessing" from the algorithm pages, computed live by the backend's `/api/explain`.
+
+### One search, all four explanations
+
+`runSearch` now asks for everything at once. That includes the explanation of **all four** algorithms, so switching between them inside the tab needs no new request:
+
+```ts
+const P = params.caseSensitive ? params.q : params.q.toLowerCase()
+const [found, compared, explained] = await Promise.all([
+  api.search(params.q, params.algo, params.caseSensitive),
+  api.compare(params.q, params.caseSensitive),
+  Promise.all(ALGORITHMS.map((a) => api.explain(P, a.value))),
+])
+```
+
+**Why lowercase `P`?** A case-insensitive search lowercases the pattern before matching. The tables must show the pattern the matchers **really** use. Searching `The Fox` case-insensitively gives a KMP row `t h e ␣ f o x`, not `T h e ␣ F o x`.
+
+The inner tabs (Naive · Rabin-Karp · Finite Automaton · KMP) open on **the algorithm you searched with**. `HowItWorks` gets a `key` built from the last search, so a new search re-creates it, and it opens on the new search's algorithm again.
+
+### What each algorithm shows (pattern `ababaca`)
+
+**Naive:** no table. It doesn't preprocess.
+
+**Rabin-Karp:** four numbers:
+
+| | Value | Meaning |
+|---|---|---|
+| d | 256 | radix (alphabet size) |
+| q | 101 | prime modulus |
+| h | 25 | d<sup>m−1</sup> mod q = 256<sup>6</sup> mod 101 |
+| p | 51 | hash of the pattern |
+
+plus the rolling-hash formula `t′ = (d·(t − T[s]·h) + T[s+m]) mod q`.
+
+**Finite Automaton:** the δ table. One row per state q = 0..7, one column per pattern character plus **other**:
+
+| state q | matched | a | b | c | other |
+|---|---|---|---|---|---|
+| 0 | ε | **1** | 0 | 0 | 0 |
+| 1 | a | 1 | **2** | 0 | 0 |
+| 2 | ab | **3** | 0 | 0 | 0 |
+| 3 | aba | 1 | **4** | 0 | 0 |
+| 4 | abab | **5** | 0 | 0 | 0 |
+| 5 | ababa | 1 | 4 | **6** | 0 |
+| 6 | ababac | **7** | 0 | 0 | 0 |
+| 7 ✔ | ababaca | 1 | 2 | 0 | 0 |
+
+This is CLRS Figure 32.7. How the UI makes it readable:
+- **Highlighted (bold) cells** are the forward transitions δ(q, P[q]) = q + 1, the path straight along the pattern. In the code, a cell is highlighted when `next === q + 1`.
+- Every **other** cell is a fallback. For example δ(5, b) = 4: after `ababa` then `b`, the longest prefix of the pattern that is still matched is `abab`.
+- The **matched** column shows which prefix state q stands for (ε means the empty string).
+- The last row (q = m) is marked **match**.
+- Spaces are shown as `␣`, so a pattern like `the fox` has a visible column for the space.
+
+**KMP:** the prefix function under the pattern:
+
+| q | 0 | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|---|
+| P[q] | a | b | a | b | a | c | a |
+| π[q] | 0 | 0 | **1** | **2** | **3** | 0 | **1** |
+
+Non-zero π values are bold. Those are the places where KMP can keep part of a match after a mismatch instead of starting over.
+
+### Final polish
+
+- **Complexity badges** now use real symbols: `O(m³·|Σ|)` and `O((n−m+1)·m)` instead of `m^3` and `n-m+1`. The strings live in the backend's `Algorithm.java`, which `run.sh` / `run.ps1` compile with `-encoding UTF-8`.
+- In the Rabin-Karp view, `h` uses real superscripts (`<sup>`), and the rolling-hash formula is on its own line instead of wrapping in the middle.
+- **Favicon:** the Vite logo was replaced with a small magnifier icon (`public/favicon.svg`).
+- **Re-checked in Edge:** all of the 9.8 checks plus the Comparison and How-it-works tabs, on desktop and at 420px. No console errors.

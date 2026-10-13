@@ -10,18 +10,18 @@ import searchengine.algorithms.StringMatcher;
 public enum Algorithm {
 
     NAIVE(new NaiveMatcher(),
-            "Preprocessing: none. Matching: O((n-m+1)m)",
+            "Preprocessing: none. Matching: O((n−m+1)·m)",
             "Tries every shift s of the pattern over the text and compares character by character "
                     + "until a mismatch. No preprocessing, but it may re-check the same text characters many times."),
 
     RABIN_KARP(new RabinKarpMatcher(),
-            "Preprocessing: O(m). Matching: average O(n+m), worst O((n-m+1)m)",
+            "Preprocessing: O(m). Matching: average O(n+m), worst O((n−m+1)·m)",
             "Treats each window of m characters as a number in base d, modulo a prime q. "
                     + "It compares the window hash with the pattern hash p and checks characters only on a hash hit. "
                     + "The window hash is updated in O(1) as it slides (rolling hash)."),
 
     FINITE_AUTOMATON(new FiniteAutomatonMatcher(),
-            "Preprocessing: O(m^3 |Σ|). Matching: O(n)",
+            "Preprocessing: O(m³·|Σ|). Matching: O(n)",
             "Builds a state machine with states 0..m. State q means the last q text characters match the "
                     + "first q pattern characters. The table δ(q, a) gives the next state, so every text "
                     + "character is read exactly once. Reaching state m means a match."),

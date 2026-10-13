@@ -100,7 +100,7 @@ backend/
     Main.java        ✅ HTTP server
   documents/         ✅ sample .txt files
   run.sh / run.ps1   ✅ compile + start
-frontend/            🟡 React app (documents, search, results, comparison)
+frontend/            ✅ React app (documents, search, results, comparison, how it works)
 docs/                ✅ these notes
 ```
 
@@ -115,7 +115,7 @@ docs/                ✅ these notes
 | 5 | Frontend scaffold | ✅ |
 | 6 | Documents panel, search bar, results | ✅ |
 | 7 | Comparison view (table + chart) | ✅ |
-| 8 | How-it-works view + polish | ⏳ |
+| 8 | How-it-works view + polish | ✅ |
 
 ## The common interface
 
